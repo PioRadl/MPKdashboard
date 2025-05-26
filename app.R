@@ -99,11 +99,15 @@ ui <- fluidPage(
             tags$div("(Click on the departure to show it on the map)", style = "font-size: 16px; margin-bottom: 10px;"),
             selectInput("stop", "Stop name:", 
                         choices = unique(stops_data$Name), selected = "Politechnika"),
-            splitLayout(
-              selectInput("stop_id", "Stop code:", 
-                          choices = stops_data$Id[stops_data$Name == "Politechnika"],
-                          selected = stops_data$Id[stops_data$Name == "Politechnika"][1]),
-              shinyTime::timeInput("time", "Select time:", value = Sys.time(), seconds = FALSE)
+            fluidRow(
+              column(6,
+                selectInput("stop_id", "Stop code:", 
+                            choices = stops_data$Id[stops_data$Name == "Politechnika"],
+                            selected = stops_data$Id[stops_data$Name == "Politechnika"][1],),
+                ),
+              column(6,
+                shinyTime::timeInput("time", "Select time:", value = Sys.time(), seconds = FALSE)
+              )
             ),
             DTOutput("table"),
           ),
@@ -124,7 +128,7 @@ ui <- fluidPage(
                   sliderInput("exchanges", HTML("Choose max<br> number of exchanges:"), 
                               min = 0, max = 2, value = 0),
                   sliderInput("time_available", HTML("Adjust available time <br>(in minutes):"), 
-                              min = 0, max = 60, value = 15)
+                              min = 0, max = 60, value = 10)
                 ),
                 leafletOutput("reachable")
               )
@@ -415,7 +419,7 @@ server <- function(input, output, session) {
     for (i in 0:input$exchanges) {
       new_df <- pmap_dfr(df, find_reachable_stops) %>%
         select(Name, Time, Path) %>%
-        mutate(Path = paste(Path, "->", Name)) %>%
+        mutate(Path = paste(Path, "-><br>", Name)) %>%
         distinct()
       df <- df %>% rbind(new_df) %>%
         group_by(Name) %>%

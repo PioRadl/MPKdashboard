@@ -290,7 +290,8 @@ server <- function(input, output, session) {
   
   output$table <- renderDT({
     req(input$stop_id)
-    departures_to_show <- departures_data() %>% select(Line, Direction, DepartureTime)
+    departures_to_show <- departures_data() %>% select(Line, Direction, DepartureTime) %>%
+      distinct()
     
     datatable(departures_to_show, rownames = FALSE, selection = "single")
   })

@@ -387,11 +387,15 @@ server <- function(input, output, session) {
     
     df <- data.frame(Name = stop, Time = chosen_time, Path = stop)
     
+    trips_data <- trip_data %>%
+      filter(60*as.numeric(Hour) + as.numeric(Minute) > chosen_time, 
+             60*as.numeric(Hour) + as.numeric(Minute) < chosen_time + input$time_available)
+    
     find_reachable_stops <- function(Name, Time, Path) {
       stop <- Name
       time <- Time
       path <- Path
-      possible_trips <- trip_data %>%
+      possible_trips <- trips_data %>%
         mutate(Time = 60*as.numeric(Hour) + as.numeric(Minute)) %>%
         select(Name, Id, TripID, Time, Line) %>%
         filter(Name == stop, Time - chosen_time < 60, Time > time) %>%
@@ -403,7 +407,7 @@ server <- function(input, output, session) {
         select(TripID, Time, Path) %>%
         rename (DepTime = Time)
       
-      reachable_stops <- trip_data %>%
+      reachable_stops <- trips_data %>%
         mutate(Time = 60*as.numeric(Hour) + as.numeric(Minute)) %>%
         select(Name, Id, TripID, Time) %>%
         filter(TripID %in% possible_trip_IDs, Time - chosen_time < 60, Time > time)
